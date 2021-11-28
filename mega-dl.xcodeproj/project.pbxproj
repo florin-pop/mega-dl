@@ -1,0 +1,358 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 52;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		4E08701D26A9937400279E6A /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E08701C26A9937400279E6A /* main.swift */; };
+		4E18B38126A9B24900522810 /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = 4E18B38026A9B24900522810 /* ArgumentParser */; };
+		4E18B38426A9B27700522810 /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 4E18B38326A9B27700522810 /* CryptoSwift */; };
+		4E18B38626A9BD9E00522810 /* Data+UInt32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E18B38526A9BD9E00522810 /* Data+UInt32.swift */; };
+		4E18B38826A9BDEC00522810 /* Array+Blocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E18B38726A9BDEC00522810 /* Array+Blocks.swift */; };
+		4E18B38A26A9BE1600522810 /* String+Base64.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E18B38926A9BE1600522810 /* String+Base64.swift */; };
+		4E18B38C26A9C18E00522810 /* MegaLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E18B38B26A9C18E00522810 /* MegaLink.swift */; };
+		4EA05CF82750193600C31F77 /* AESDecryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA05CF72750193600C31F77 /* AESDecryptor.swift */; };
+		4EF6C44826A9E36F001C2088 /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF6C44726A9E36F001C2088 /* DownloadManager.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		4E08701726A9937400279E6A /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		4E08701926A9937400279E6A /* mega-dl */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "mega-dl"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4E08701C26A9937400279E6A /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		4E18B38526A9BD9E00522810 /* Data+UInt32.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+UInt32.swift"; sourceTree = "<group>"; };
+		4E18B38726A9BDEC00522810 /* Array+Blocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Blocks.swift"; sourceTree = "<group>"; };
+		4E18B38926A9BE1600522810 /* String+Base64.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Base64.swift"; sourceTree = "<group>"; };
+		4E18B38B26A9C18E00522810 /* MegaLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MegaLink.swift; sourceTree = "<group>"; };
+		4EA05CF72750193600C31F77 /* AESDecryptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AESDecryptor.swift; sourceTree = "<group>"; };
+		4EF6C44726A9E36F001C2088 /* DownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4E08701626A9937400279E6A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4E18B38126A9B24900522810 /* ArgumentParser in Frameworks */,
+				4E18B38426A9B27700522810 /* CryptoSwift in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4E08701026A9937400279E6A = {
+			isa = PBXGroup;
+			children = (
+				4E08701B26A9937400279E6A /* mega-dl */,
+				4E08701A26A9937400279E6A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		4E08701A26A9937400279E6A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4E08701926A9937400279E6A /* mega-dl */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4E08701B26A9937400279E6A /* mega-dl */ = {
+			isa = PBXGroup;
+			children = (
+				4EA05CF72750193600C31F77 /* AESDecryptor.swift */,
+				4E18B38726A9BDEC00522810 /* Array+Blocks.swift */,
+				4E18B38526A9BD9E00522810 /* Data+UInt32.swift */,
+				4EF6C44726A9E36F001C2088 /* DownloadManager.swift */,
+				4E08701C26A9937400279E6A /* main.swift */,
+				4E18B38B26A9C18E00522810 /* MegaLink.swift */,
+				4E18B38926A9BE1600522810 /* String+Base64.swift */,
+			);
+			path = "mega-dl";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		4E08701826A9937400279E6A /* mega-dl */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4E08702026A9937400279E6A /* Build configuration list for PBXNativeTarget "mega-dl" */;
+			buildPhases = (
+				4E08701526A9937400279E6A /* Sources */,
+				4E08701626A9937400279E6A /* Frameworks */,
+				4E08701726A9937400279E6A /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "mega-dl";
+			packageProductDependencies = (
+				4E18B38026A9B24900522810 /* ArgumentParser */,
+				4E18B38326A9B27700522810 /* CryptoSwift */,
+			);
+			productName = "mega-dl";
+			productReference = 4E08701926A9937400279E6A /* mega-dl */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4E08701126A9937400279E6A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1250;
+				LastUpgradeCheck = 1250;
+				TargetAttributes = {
+					4E08701826A9937400279E6A = {
+						CreatedOnToolsVersion = 12.5;
+					};
+				};
+			};
+			buildConfigurationList = 4E08701426A9937400279E6A /* Build configuration list for PBXProject "mega-dl" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 4E08701026A9937400279E6A;
+			packageReferences = (
+				4E18B37F26A9B24900522810 /* XCRemoteSwiftPackageReference "swift-argument-parser" */,
+				4E18B38226A9B27700522810 /* XCRemoteSwiftPackageReference "CryptoSwift" */,
+			);
+			productRefGroup = 4E08701A26A9937400279E6A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				4E08701826A9937400279E6A /* mega-dl */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4E08701526A9937400279E6A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4E18B38C26A9C18E00522810 /* MegaLink.swift in Sources */,
+				4EF6C44826A9E36F001C2088 /* DownloadManager.swift in Sources */,
+				4E18B38826A9BDEC00522810 /* Array+Blocks.swift in Sources */,
+				4E18B38A26A9BE1600522810 /* String+Base64.swift in Sources */,
+				4E18B38626A9BD9E00522810 /* Data+UInt32.swift in Sources */,
+				4E08701D26A9937400279E6A /* main.swift in Sources */,
+				4EA05CF82750193600C31F77 /* AESDecryptor.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		4E08701E26A9937400279E6A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		4E08701F26A9937400279E6A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		4E08702126A9937400279E6A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = JS5W9765VA;
+				ENABLE_HARDENED_RUNTIME = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		4E08702226A9937400279E6A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = JS5W9765VA;
+				ENABLE_HARDENED_RUNTIME = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4E08701426A9937400279E6A /* Build configuration list for PBXProject "mega-dl" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4E08701E26A9937400279E6A /* Debug */,
+				4E08701F26A9937400279E6A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4E08702026A9937400279E6A /* Build configuration list for PBXNativeTarget "mega-dl" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4E08702126A9937400279E6A /* Debug */,
+				4E08702226A9937400279E6A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4E18B37F26A9B24900522810 /* XCRemoteSwiftPackageReference "swift-argument-parser" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:apple/swift-argument-parser.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.4.3;
+			};
+		};
+		4E18B38226A9B27700522810 /* XCRemoteSwiftPackageReference "CryptoSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:krzyzanowskim/CryptoSwift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.4.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4E18B38026A9B24900522810 /* ArgumentParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4E18B37F26A9B24900522810 /* XCRemoteSwiftPackageReference "swift-argument-parser" */;
+			productName = ArgumentParser;
+		};
+		4E18B38326A9B27700522810 /* CryptoSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4E18B38226A9B27700522810 /* XCRemoteSwiftPackageReference "CryptoSwift" */;
+			productName = CryptoSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 4E08701126A9937400279E6A /* Project object */;
+}
