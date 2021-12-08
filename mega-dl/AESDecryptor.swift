@@ -40,7 +40,7 @@ class AESDecryptor {
         
         DispatchQueue.global(qos: .default).async { [weak self] in
             do {
-                var decryptor = try AES(key: key, blockMode: .ctr)?.makeDecryptor()
+                var decryptor = try AES(key: key, blockMode: .ctr, padding: .noPadding)?.makeDecryptor()
                 var reachedEndOfFile = false
                 repeat {
                     let encryptedData = encryptedFileHandle.readData(ofLength: 64 * 1024)

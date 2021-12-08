@@ -13,6 +13,10 @@ protocol DownloadDelegate: AnyObject {
     func downloadManagerDidComplete(file: String, error: Error?)
 }
 
+enum DownloadError: Error {
+    case statusCodeError(Int)
+}
+
 class DownloadManager: NSObject {
     class DownloadItem {
         var totalBytesWritten: Int64 = 0
@@ -31,7 +35,9 @@ class DownloadManager: NSObject {
             self.name = name
             self.completionHandler = completion
             
-            self.downloadTask = DownloadManager.shared.urlSession.downloadTask(with: url)
+            let request = URLRequest(url: url)
+            
+            self.downloadTask = DownloadManager.shared.urlSession.downloadTask(with: request)
             self.downloadTask.resume()
         }
     }
@@ -75,13 +81,21 @@ extension DownloadManager: URLSessionDownloadDelegate {
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         guard let downloadItem = DownloadManager.shared.downloadItem(by: downloadTask) else { return }
         
-        self.delegate?.downloadManagerDidComplete(file: downloadItem.name, error: nil)
-        downloadItem.completionHandler?(location, nil)
+        let error: Error?
+        
+        if let statusCode = (downloadTask.response as? HTTPURLResponse)?.statusCode, !(200..<300).contains(statusCode) {
+            error = DownloadError.statusCodeError(statusCode)
+        } else {
+            error = nil
+        }
+        
+        self.delegate?.downloadManagerDidComplete(file: downloadItem.name, error: error)
+        downloadItem.completionHandler?(location, error)
     }
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         guard let error = error, let downloadItem = DownloadManager.shared.downloadItem(by: task) else { return }
-        
+
         self.delegate?.downloadManagerDidComplete(file: downloadItem.name, error: error)
         downloadItem.completionHandler?(nil, error)
     }

@@ -9,12 +9,14 @@
 /* Begin PBXBuildFile section */
 		4E08701D26A9937400279E6A /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E08701C26A9937400279E6A /* main.swift */; };
 		4E18B38126A9B24900522810 /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = 4E18B38026A9B24900522810 /* ArgumentParser */; };
-		4E18B38426A9B27700522810 /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 4E18B38326A9B27700522810 /* CryptoSwift */; };
 		4E18B38626A9BD9E00522810 /* Data+UInt32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E18B38526A9BD9E00522810 /* Data+UInt32.swift */; };
 		4E18B38826A9BDEC00522810 /* Array+Blocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E18B38726A9BDEC00522810 /* Array+Blocks.swift */; };
 		4E18B38A26A9BE1600522810 /* String+Base64.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E18B38926A9BE1600522810 /* String+Base64.swift */; };
 		4E18B38C26A9C18E00522810 /* MegaLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E18B38B26A9C18E00522810 /* MegaLink.swift */; };
+		4E4C802A2759080A0058B8DE /* ini.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E4C80292759080A0058B8DE /* ini.swift */; };
 		4EA05CF82750193600C31F77 /* AESDecryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA05CF72750193600C31F77 /* AESDecryptor.swift */; };
+		4EDE4D58275FE32F00F1A72C /* BigInt in Frameworks */ = {isa = PBXBuildFile; productRef = 4EDE4D57275FE32F00F1A72C /* BigInt */; };
+		4EDE4D5B275FE35300F1A72C /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 4EDE4D5A275FE35300F1A72C /* CryptoSwift */; };
 		4EF6C44826A9E36F001C2088 /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF6C44726A9E36F001C2088 /* DownloadManager.swift */; };
 /* End PBXBuildFile section */
 
@@ -37,6 +39,7 @@
 		4E18B38726A9BDEC00522810 /* Array+Blocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Blocks.swift"; sourceTree = "<group>"; };
 		4E18B38926A9BE1600522810 /* String+Base64.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Base64.swift"; sourceTree = "<group>"; };
 		4E18B38B26A9C18E00522810 /* MegaLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MegaLink.swift; sourceTree = "<group>"; };
+		4E4C80292759080A0058B8DE /* ini.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ini.swift; sourceTree = "<group>"; };
 		4EA05CF72750193600C31F77 /* AESDecryptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AESDecryptor.swift; sourceTree = "<group>"; };
 		4EF6C44726A9E36F001C2088 /* DownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -47,7 +50,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				4E18B38126A9B24900522810 /* ArgumentParser in Frameworks */,
-				4E18B38426A9B27700522810 /* CryptoSwift in Frameworks */,
+				4EDE4D58275FE32F00F1A72C /* BigInt in Frameworks */,
+				4EDE4D5B275FE35300F1A72C /* CryptoSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,6 +84,7 @@
 				4E08701C26A9937400279E6A /* main.swift */,
 				4E18B38B26A9C18E00522810 /* MegaLink.swift */,
 				4E18B38926A9BE1600522810 /* String+Base64.swift */,
+				4E4C80292759080A0058B8DE /* ini.swift */,
 			);
 			path = "mega-dl";
 			sourceTree = "<group>";
@@ -102,7 +107,8 @@
 			name = "mega-dl";
 			packageProductDependencies = (
 				4E18B38026A9B24900522810 /* ArgumentParser */,
-				4E18B38326A9B27700522810 /* CryptoSwift */,
+				4EDE4D57275FE32F00F1A72C /* BigInt */,
+				4EDE4D5A275FE35300F1A72C /* CryptoSwift */,
 			);
 			productName = "mega-dl";
 			productReference = 4E08701926A9937400279E6A /* mega-dl */;
@@ -133,7 +139,8 @@
 			mainGroup = 4E08701026A9937400279E6A;
 			packageReferences = (
 				4E18B37F26A9B24900522810 /* XCRemoteSwiftPackageReference "swift-argument-parser" */,
-				4E18B38226A9B27700522810 /* XCRemoteSwiftPackageReference "CryptoSwift" */,
+				4EDE4D56275FE32F00F1A72C /* XCRemoteSwiftPackageReference "BigInt" */,
+				4EDE4D59275FE35300F1A72C /* XCRemoteSwiftPackageReference "CryptoSwift" */,
 			);
 			productRefGroup = 4E08701A26A9937400279E6A /* Products */;
 			projectDirPath = "";
@@ -153,6 +160,7 @@
 				4EF6C44826A9E36F001C2088 /* DownloadManager.swift in Sources */,
 				4E18B38826A9BDEC00522810 /* Array+Blocks.swift in Sources */,
 				4E18B38A26A9BE1600522810 /* String+Base64.swift in Sources */,
+				4E4C802A2759080A0058B8DE /* ini.swift in Sources */,
 				4E18B38626A9BD9E00522810 /* Data+UInt32.swift in Sources */,
 				4E08701D26A9937400279E6A /* main.swift in Sources */,
 				4EA05CF82750193600C31F77 /* AESDecryptor.swift in Sources */,
@@ -280,10 +288,14 @@
 		4E08702126A9937400279E6A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = JS5W9765VA;
 				ENABLE_HARDENED_RUNTIME = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.florinpop.mega-dl";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -291,10 +303,14 @@
 		4E08702226A9937400279E6A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = JS5W9765VA;
 				ENABLE_HARDENED_RUNTIME = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.florinpop.mega-dl";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -331,12 +347,20 @@
 				minimumVersion = 0.4.3;
 			};
 		};
-		4E18B38226A9B27700522810 /* XCRemoteSwiftPackageReference "CryptoSwift" */ = {
+		4EDE4D56275FE32F00F1A72C /* XCRemoteSwiftPackageReference "BigInt" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:attaswift/BigInt.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
+		4EDE4D59275FE35300F1A72C /* XCRemoteSwiftPackageReference "CryptoSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "git@github.com:krzyzanowskim/CryptoSwift.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.4.1;
+				minimumVersion = 1.0.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -347,9 +371,14 @@
 			package = 4E18B37F26A9B24900522810 /* XCRemoteSwiftPackageReference "swift-argument-parser" */;
 			productName = ArgumentParser;
 		};
-		4E18B38326A9B27700522810 /* CryptoSwift */ = {
+		4EDE4D57275FE32F00F1A72C /* BigInt */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4E18B38226A9B27700522810 /* XCRemoteSwiftPackageReference "CryptoSwift" */;
+			package = 4EDE4D56275FE32F00F1A72C /* XCRemoteSwiftPackageReference "BigInt" */;
+			productName = BigInt;
+		};
+		4EDE4D5A275FE35300F1A72C /* CryptoSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4EDE4D59275FE35300F1A72C /* XCRemoteSwiftPackageReference "CryptoSwift" */;
 			productName = CryptoSwift;
 		};
 /* End XCSwiftPackageProductDependency section */

@@ -148,22 +148,55 @@ struct MegaDL: ParsableCommand {
         
         let dispatchGroup = DispatchGroup()
         dispatchGroup.enter()
+        let homeDirURL = FileManager.default.homeDirectoryForCurrentUser
         
+        if let config = parseConfig(homeDirURL.appendingPathComponent(".mega-dl.ini")),
+           let credentials = config["Credentials"],
+           let email = credentials["email"],
+           let password = credentials["password"] {
+            
+            print("Authenticating using stored credentials")
+            
+            login0(using: email, password: password) { result in
+                switch result {
+                case .success(let sessionID):
+                    process(megaLink: megaLink, dispatchGroup: dispatchGroup, sessionID: sessionID) { bytesExpected in
+                        downloadProgress.totalBytesExpected = bytesExpected
+                    }
+                case .failure(let error):
+                    print("Authentication failed")
+                    // TODO log error
+                }
+            }
+        } else {
+            process(megaLink: megaLink, dispatchGroup: dispatchGroup) { bytesExpected in
+                downloadProgress.totalBytesExpected = bytesExpected
+            }
+        }
+        
+        dispatchGroup.notify(queue: .main) {
+            MegaDL.exit(withError: nil)
+        }
+        dispatchMain()
+    }
+    
+    func process(megaLink: MegaLink, dispatchGroup: DispatchGroup, sessionID: String? = nil, bytesExpectedCallback: @escaping (Int64) -> Void) {
         if megaLink.type == .folder {
-            getContents(of: megaLink) { result in
+            getContents(of: megaLink, sessionID: sessionID) { result in
                 switch result {
                 case .success(let items):
-                    downloadProgress.totalBytesExpected = items.values.filter {$0.type == .file}.compactMap { Int64($0.size ?? 0) }.reduce(0, +)
-                    
+                    let totalBytesExpected = items.values.filter {$0.type == .file}.compactMap { Int64($0.size ?? 0) }.reduce(0, +)
+                    bytesExpectedCallback(totalBytesExpected)
+
                     for (_, item) in items {
                         var decryptedFileUrl = URL(fileURLWithPath: FileManager().currentDirectoryPath)
                         items.getPath(key: item.id, url: &decryptedFileUrl)
-                        
+
                         if item.type == .folder {
                             try? FileManager().createDirectory(at: decryptedFileUrl, withIntermediateDirectories: true, attributes: nil)
                         } else if item.type == .file {
                             dispatchGroup.enter()
-                            getDownloadLink(from: item.id, parentNode: megaLink.id) { result in
+                            getDownloadLink(from: item.id, parentNode: megaLink.id, sessionID: sessionID) { result in
                                 switch result {
                                 case .success(let fileInfo):
                                     guard let url = URL(string: fileInfo.downloadLink) else {
@@ -171,14 +204,14 @@ struct MegaDL: ParsableCommand {
                                         dispatchGroup.leave()
                                         return
                                     }
-                                    
+
                                     DownloadManager.shared.download(url: url, name: item.attributes.name) { encryptedFileUrl, error in
                                         guard let encryptedFileUrl = encryptedFileUrl, error == nil else {
                                             // Download error should be handled by the delegate
                                             dispatchGroup.leave()
                                             return
                                         }
-                                        
+
                                         AESDecryptor.shared.decrypt(encryptedFileUrl: encryptedFileUrl, decryptedFileUrl: decryptedFileUrl, key: item.key) {
                                             dispatchGroup.leave()
                                         }
@@ -195,23 +228,23 @@ struct MegaDL: ParsableCommand {
                     print("Failed to retrieve folder contents")
                     logger.error("Retrieve folder contents failed with error: \(error.localizedDescription, privacy: .public)")
                 }
-                
+
                 dispatchGroup.leave()
             }
         } else {
-            getFileMetadata(from: megaLink) { result in
+            getFileMetadata(from: megaLink, sessionID: sessionID) { result in
                 switch result {
                 case .success(let downloadMetadata):
-                    downloadProgress.totalBytesExpected = downloadMetadata.size
+                    bytesExpectedCallback(downloadMetadata.size)
                     let decryptedFileUrl = URL(fileURLWithPath: FileManager().currentDirectoryPath).appendingPathComponent(downloadMetadata.name)
-                    
+
                     DownloadManager.shared.download(url: downloadMetadata.url, name: downloadMetadata.name) { encryptedFileUrl, error in
                         guard let encryptedFileUrl = encryptedFileUrl, error == nil else {
                             // Download error should be handled by the delegate
                             dispatchGroup.leave()
                             return
                         }
-                        
+
                         AESDecryptor.shared.decrypt(encryptedFileUrl: encryptedFileUrl, decryptedFileUrl: decryptedFileUrl, key: downloadMetadata.key) {
                             dispatchGroup.leave()
                         }
@@ -223,12 +256,6 @@ struct MegaDL: ParsableCommand {
                 }
             }
         }
-        
-        dispatchGroup.notify(queue: .main) {
-            MegaDL.exit(withError: nil)
-        }
-        dispatchMain()
-        
     }
 }
 
