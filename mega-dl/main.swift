@@ -6,7 +6,6 @@
 //
 
 import ArgumentParser
-import CryptoSwift
 import Darwin
 import Dispatch
 import Foundation

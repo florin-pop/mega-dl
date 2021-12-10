@@ -20,6 +20,15 @@
         }
       },
       {
+        "package": "MegaKit",
+        "repositoryURL": "git@github.com:florin-pop/MegaKit.git",
+        "state": {
+          "branch": "main",
+          "revision": "af4afe21f060ff70a0e74e7645668b24be6be3dd",
+          "version": null
+        }
+      },
+      {
         "package": "swift-argument-parser",
         "repositoryURL": "git@github.com:apple/swift-argument-parser.git",
         "state": {
