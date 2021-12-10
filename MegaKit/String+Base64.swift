@@ -1,13 +1,13 @@
 //
 //  String+Base64.swift
-//  mega-dl
+//  MegaKit
 //
 //  Created by Florin Pop on 22.07.21.
 //
 
 import Foundation
 
-extension String {
+public extension String {
     func base64Decoded() -> Data? {
         let padded = self.replacingOccurrences(of: ",", with: "")
             .padding(toLength: ((self.count + 3) / 4) * 4,

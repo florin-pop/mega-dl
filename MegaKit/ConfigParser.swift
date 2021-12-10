@@ -1,15 +1,15 @@
 //
-//  ini.swift
-//  mega-dl
+//  ConfigParser.swift
+//  MegaKit
 //
 //  Created by Florin Pop on 02.12.21.
-// https://gist.github.com/jetmind/f776c0d223e4ac6aec1ff9389e874553
+//  https://gist.github.com/jetmind/f776c0d223e4ac6aec1ff9389e874553
 
 import Foundation
 
 
-typealias SectionConfig = [String: String]
-typealias Config = [String: SectionConfig]
+public typealias SectionConfig = [String: String]
+public typealias Config = [String: SectionConfig]
 
 
 func trim(_ s: String) -> String {
@@ -20,9 +20,9 @@ func trim(_ s: String) -> String {
 
 func stripComment(_ line: String) -> String {
     let parts = line.split(
-      separator: "#",
-      maxSplits: 1,
-      omittingEmptySubsequences: false)
+        separator: "#",
+        maxSplits: 1,
+        omittingEmptySubsequences: false)
     if parts.count > 0 {
         return String(parts[0])
     }
@@ -48,11 +48,10 @@ func parseLine(_ line: String) -> (String, String)? {
 }
 
 
-func parseConfig(_ fileURL : URL) -> Config? {
-    guard let f = try? String(contentsOf: fileURL) else { return nil }
+public func parseConfig(_ fileContents : String) -> Config {
     var config = Config()
     var currentSectionName = "main"
-    for line in f.components(separatedBy: "\n") {
+    for line in fileContents.components(separatedBy: "\n") {
         let line = trim(line)
         if line.hasPrefix("[") && line.hasSuffix("]") {
             currentSectionName = parseSectionHeader(line)

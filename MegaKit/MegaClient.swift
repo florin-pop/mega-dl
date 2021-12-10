@@ -1,8 +1,8 @@
 //
-//  MegaLink.swift
-//  mega-dl
+//  MegaClient.swift
+//  MegaKit
 //
-//  Created by Florin Pop on 22.07.21.
+//  Created by Florin Pop on 10.12.21.
 //
 
 import Foundation
@@ -10,7 +10,7 @@ import CryptoSwift
 import BigInt
 
 struct MegaSequence {
-    private var val = 1
+    private var val = Int.random(in: 0..<0xFFFFFFFF)
     
     public static var instance: MegaSequence = MegaSequence()
     
@@ -20,93 +20,8 @@ struct MegaSequence {
     }
 }
 
-struct MegaLink {
-    enum LinkType {
-        case file
-        case folder
-    }
-    
-    // http://megous.com/git/megatools/tree/tools/dl.c#n363
-    private static let regexes: [String: LinkType] = [
-        "^https?://mega(?:\\.co)?\\.nz/#!([a-z0-9_-]{8})!([a-z0-9_-]{43})$": .file,
-        "^https?://mega\\.nz/file/([a-z0-9_-]{8})#([a-z0-9_-]{43})$": .file,
-        "^https?://mega(?:\\.co)?\\.nz/#F!([a-z0-9_-]{8})!([a-z0-9_-]{22})(?:[!?]([a-z0-9_-]{8}))?$": .folder,
-        "^https?://mega\\.nz/folder/([a-z0-9_-]{8})#([a-z0-9_-]{22})/file/([a-z0-9_-]{8})$": .folder,
-        "^https?://mega\\.nz/folder/([a-z0-9_-]{8})#([a-z0-9_-]{22})/folder/([a-z0-9_-]{8})$": .folder,
-        "^https?://mega\\.nz/folder/([a-z0-9_-]{8})#([a-z0-9_-]{22})$": .folder
-    ]
-    
-    let url: String
-    let type: LinkType
-    let id: String
-    let key: String
-    let specific: String? // ?
-    
-    init?(url: String) {
-        self.url = url
-        let matchResult: (NSTextCheckingResult, LinkType)? = {
-            for (pattern, type) in Self.regexes {
-                let range = NSRange(url.startIndex..<url.endIndex, in: url)
-                let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive])
-                
-                if let match = regex?.matches(in: url, range: range).first,
-                   match.numberOfRanges >= 2 {
-                    return (match, type)
-                }
-            }
-            return nil
-        }()
-        
-        guard let (match, type) = matchResult else { return nil }
-        
-        self.type = type
-        let string = url as NSString
-        self.id = string.substring(with: match.range(at: 1))
-        self.key = string.substring(with: match.range(at: 2)).replacingOccurrences(of: "%20", with: "")
-        if match.numberOfRanges > 3 {
-            self.specific = string.substring(with: match.range(at: 3))
-        } else {
-            self.specific = nil
-        }
-    }
-}
-
-extension AES {
-    enum BlockMode {
-        case ctr
-        case cbc
-    }
-    
-    convenience init?(key base64Key: Data, blockMode: BlockMode, padding: Padding) {
-        if blockMode == .ctr {
-            let intKey = base64Key.toUInt32Array()
-            let keyNOnce = [intKey[0] ^ intKey[4], intKey[1] ^ intKey[5], intKey[2] ^ intKey[6], intKey[3] ^ intKey[7], intKey[4], intKey[5]]
-            let key = Data(uInt32Array: [keyNOnce[0], keyNOnce[1], keyNOnce[2], keyNOnce[3]])
-            let iiv = [keyNOnce[4], keyNOnce[5], 0, 0]
-            let iv = Data(uInt32Array: iiv)
-            
-            try? self.init(key: Array(key), blockMode: CTR(iv: Array(iv)), padding: padding)
-        } else if blockMode == .cbc {
-            let key: Data
-            if base64Key.count == 32 {
-                let keyBlocks = base64Key.toUInt32Array().blocks(of: 4)
-                key = Data(uInt32Array: zip(keyBlocks[0], keyBlocks[1]).map(^))
-            } else {
-                key = base64Key
-            }
-            
-            let iiv: [UInt32] = [0, 0, 0, 0]
-            let iv = Data(uInt32Array: iiv)
-            
-            try? self.init(key: Array(key), blockMode: CBC(iv: Array(iv)), padding: padding)
-        } else {
-            return nil
-        }
-    }
-}
-
-struct MegaFileAttributes: Decodable {
-    let name: String
+public struct MegaFileAttributes: Decodable {
+    public let name: String
     
     enum CodingKeys: String, CodingKey {
         case name = "n"
@@ -125,10 +40,10 @@ struct MegaFileAttributes: Decodable {
     }
 }
 
-struct MegaFileMetadata: Decodable {
-    let size: Int64
-    let encryptedAttributes: String
-    let downloadLink: String
+public struct MegaFileMetadata: Decodable {
+    public let size: Int64
+    public let encryptedAttributes: String
+    public let downloadLink: String
     
     enum CodingKeys: String, CodingKey {
         case size = "s"
@@ -147,114 +62,26 @@ extension MegaFileMetadata {
     }
 }
 
-typealias JSONObject = [String: Any]
-typealias JSONArray = [JSONObject]
-
-enum MegaError: Error {
-    case badURL, requestFailed, badResponse, unknown, decryptionFailed, unimplemented
+public struct DecryptedMegaFileMetadata {
+    public let url: URL
+    public let name: String
+    public let size: Int64
+    public let key: Data
 }
 
-func getDownloadLink(from handle: String, parentNode: String? = nil, sessionID: String? = nil, completion: @escaping (Result<MegaFileMetadata, MegaError>) -> Void) {
-    var urlComponents = URLComponents(string: "https://g.api.mega.co.nz/cs")
-    
-    urlComponents?.queryItems = [
-        URLQueryItem(name: "id", value: "\(MegaSequence.instance.next())"),
-    ]
-    
-    if let sessionID = sessionID {
-        urlComponents?.queryItems?.append(URLQueryItem(name: "sid", value: sessionID))
-    }
-    
-    if let node = parentNode {
-        urlComponents?.queryItems?.append(
-            URLQueryItem(name: "n", value: node)
-        )
-    }
-    
-    guard let url = urlComponents?.url else {
-        completion(.failure(.badURL))
-        return
-    }
-    
-    let requestPayload = [[
-        "a": "g", // action
-        "g": "1",
-        "ssl": "1",
-        (parentNode != nil ? "n" : "p"): handle
-    ]]
-    
-    var request = URLRequest(url: url)
-    request.httpMethod = "POST"
-    
-    guard let requestData = try? JSONSerialization.data(withJSONObject: requestPayload, options: []) else {
-        completion(.failure(.requestFailed))
-        return
-    }
-    
-    request.httpBody = requestData
-    
-    URLSession.shared.dataTask(with: request) { data, response, error in
-        if let data = data {
-            if let response = try? JSONDecoder().decode([MegaFileMetadata].self, from: data),
-               let fileInfo = response.first {
-                
-                completion(.success(fileInfo))
-            } else {
-                completion(.failure(.badResponse))
-            }
-        } else if error != nil {
-            completion(.failure(.requestFailed))
-        } else {
-            completion(.failure(.unknown))
-        }
-    }.resume()
-}
-
-
-struct DecryptedMegaFileMetadata {
-    let url: URL
-    let name: String
-    let size: Int64
-    let key: Data
-}
-
-func getFileMetadata(from link: MegaLink, sessionID: String? = nil, completion: @escaping (Result<DecryptedMegaFileMetadata, MegaError>) -> Void) {
-    getDownloadLink(from: link.id, sessionID: sessionID) { result in
-        switch result {
-        case .success(let fileInfo):
-            guard let url = URL(string: fileInfo.downloadLink) else {
-                completion(.failure(.badURL))
-                return
-            }
-            
-            guard let base64Key = link.key.base64Decoded(),
-                  let cipher = AES(key: base64Key, blockMode: .cbc, padding: .zeroPadding),
-                  let fileName = fileInfo.decryptAttributes(using: cipher)?.name else {
-                      completion(.failure(.decryptionFailed))
-                      return
-                  }
-            
-            completion(.success(DecryptedMegaFileMetadata(url: url, name: fileName, size: fileInfo.size, key: base64Key)))
-            
-        case .failure(let error):
-            completion(.failure(error))
-        }
-    }
-}
-
-struct DecryptedMegaNodeMetadata {
-    enum NodeType: Int {
+public struct DecryptedMegaNodeMetadata {
+    public enum NodeType: Int {
         case file = 0
         case folder = 1
     }
     
-    let type: NodeType
-    let id: String
-    let parent: String
-    let attributes: MegaFileAttributes
-    let key: Data
-    let timestamp: Int
-    let size: Int?
+    public let type: NodeType
+    public let id: String
+    public let parent: String
+    public let attributes: MegaFileAttributes
+    public let key: Data
+    public let timestamp: Int
+    public let size: Int?
 }
 
 struct MegaNodeMetadata: Decodable {
@@ -315,7 +142,87 @@ struct MegaTreeMetadata: Decodable {
     }
 }
 
-func getContents(of link: MegaLink, sessionID: String? = nil, completion: @escaping (Result<[String: DecryptedMegaNodeMetadata], MegaError>) -> Void) {
+public func getDownloadLink(from handle: String, parentNode: String? = nil, sessionID: String? = nil, completion: @escaping (Result<MegaFileMetadata, MegaError>) -> Void) {
+    var urlComponents = URLComponents(string: "https://g.api.mega.co.nz/cs")
+    
+    urlComponents?.queryItems = [
+        URLQueryItem(name: "id", value: "\(MegaSequence.instance.next())"),
+    ]
+    
+    if let sessionID = sessionID {
+        urlComponents?.queryItems?.append(URLQueryItem(name: "sid", value: sessionID))
+    }
+    
+    if let node = parentNode {
+        urlComponents?.queryItems?.append(
+            URLQueryItem(name: "n", value: node)
+        )
+    }
+    
+    guard let url = urlComponents?.url else {
+        completion(.failure(.badURL))
+        return
+    }
+    
+    let requestPayload = [[
+        "a": "g", // action
+        "g": "1",
+        "ssl": "1",
+        (parentNode != nil ? "n" : "p"): handle
+    ]]
+    
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    
+    guard let requestData = try? JSONSerialization.data(withJSONObject: requestPayload, options: []) else {
+        completion(.failure(.requestFailed))
+        return
+    }
+    
+    request.httpBody = requestData
+    
+    URLSession.shared.dataTask(with: request) { data, response, error in
+        if let data = data {
+            if let response = try? JSONDecoder().decode([MegaFileMetadata].self, from: data),
+               let fileInfo = response.first {
+                
+                completion(.success(fileInfo))
+            } else {
+                completion(.failure(.badResponse))
+            }
+        } else if error != nil {
+            completion(.failure(.requestFailed))
+        } else {
+            completion(.failure(.unknown))
+        }
+    }.resume()
+}
+
+public func getFileMetadata(from link: MegaLink, sessionID: String? = nil, completion: @escaping (Result<DecryptedMegaFileMetadata, MegaError>) -> Void) {
+    getDownloadLink(from: link.id, sessionID: sessionID) { result in
+        switch result {
+        case .success(let fileInfo):
+            guard let url = URL(string: fileInfo.downloadLink) else {
+                completion(.failure(.badURL))
+                return
+            }
+            
+            guard let base64Key = link.key.base64Decoded(),
+                  let cipher = AES(key: base64Key, blockMode: .cbc, padding: .zeroPadding),
+                  let fileName = fileInfo.decryptAttributes(using: cipher)?.name else {
+                      completion(.failure(.decryptionFailed))
+                      return
+                  }
+            
+            completion(.success(DecryptedMegaFileMetadata(url: url, name: fileName, size: fileInfo.size, key: base64Key)))
+            
+        case .failure(let error):
+            completion(.failure(error))
+        }
+    }
+}
+
+public func getContents(of link: MegaLink, sessionID: String? = nil, completion: @escaping (Result<[String: DecryptedMegaNodeMetadata], MegaError>) -> Void) {
     guard let base64Key = link.key.base64Decoded(),
           let cipher = AES(key: base64Key, blockMode: .cbc, padding: .zeroPadding)
     else {
@@ -402,7 +309,7 @@ struct MegaLoginVersion: Decodable {
     }
 }
 
-func login0(using email: String, password: String, completion: @escaping (Result<String, MegaError>) -> Void) {
+public func login(using email: String, password: String, completion: @escaping (Result<String, MegaError>) -> Void) {
     var urlComponents = URLComponents(string: "https://g.api.mega.co.nz/cs")
     
     urlComponents?.queryItems = [
@@ -488,10 +395,10 @@ func login0(using email: String, password: String, completion: @escaping (Result
                 
                 let passwordHash = Data(uInt32Array: [h32[0], h32[2]]).base64EncodedString()
                 
-                login1(email: email, userHash: passwordHash) { result in
+                openSession(email: email, userHash: passwordHash) { result in
                     switch result {
                     case .success(let loginSessionData):
-                        login2(passwordKey: Data(uInt32Array: passwordKey), loginSessionData: loginSessionData) { result in
+                        getSessionId(passwordKey: Data(uInt32Array: passwordKey), loginSessionData: loginSessionData) { result in
                             switch result {
                             case .success(let sessionID):
                                 completion(.success(sessionID))
@@ -514,7 +421,7 @@ func login0(using email: String, password: String, completion: @escaping (Result
     }.resume()
 }
 
-func login1(email: String, userHash: String, completion: @escaping (Result<Data, MegaError>) -> Void) {
+func openSession(email: String, userHash: String, completion: @escaping (Result<Data, MegaError>) -> Void) {
     var urlComponents = URLComponents(string: "https://g.api.mega.co.nz/cs")
     
     urlComponents?.queryItems = [
@@ -566,7 +473,7 @@ struct MegaLoginSession: Decodable {
     }
 }
 
-func login2(passwordKey: Data, loginSessionData: Data, completion: @escaping (Result<String, MegaError>) -> Void) {
+func getSessionId(passwordKey: Data, loginSessionData: Data, completion: @escaping (Result<String, MegaError>) -> Void) {
     if let response = try? JSONDecoder().decode([MegaLoginSession].self, from: loginSessionData),
        let loginSession = response.first {
         
@@ -606,7 +513,7 @@ func login2(passwordKey: Data, loginSessionData: Data, completion: @escaping (Re
             let bitlength = (Int(decryptedRSAPrivateKey[j]) * 256) + Int(decryptedRSAPrivateKey[j + 1])
             var bytelength = bitlength / 8
             bytelength = bytelength + 2
-            let data = decryptedRSAPrivateKey[j + 2..<j + bytelength]
+            let data = Data(decryptedRSAPrivateKey[j + 2..<j + bytelength])
             rsaPrivateKey[i] = BigUInt(data)
             j = j + bytelength
         }
@@ -625,7 +532,7 @@ func login2(passwordKey: Data, loginSessionData: Data, completion: @escaping (Re
         
         var binarySessionID = decryptedSessionID.serialize()
         if binarySessionID[0] == 0 {
-            binarySessionID = binarySessionID[1...]
+            binarySessionID = Data(binarySessionID[1...])
         }
         var hexSessionID = binarySessionID.hexEncodedString()
         if hexSessionID.count % 2 != 0 {

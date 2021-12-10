@@ -1,50 +1,14 @@
 //
-//  Data+UInt32.swift
-//  mega-dl
+//  Data+Hex.swift
+//  MegaKit
 //
-//  Created by Florin Pop on 22.07.21.
+//  Created by Florin Pop on 10.12.21.
 //
 
 import Foundation
 
-extension Data {
-    init(uInt32Array: [UInt32]) {
-        self.init(capacity: uInt32Array.count * 4)
-        for val in uInt32Array {
-            Swift.withUnsafeBytes(of: val.bigEndian) { self.append(contentsOf: $0) }
-        }
-    }
-    
-    func toUInt32Array() -> [UInt32] {
-        var result = [UInt32]()
-        var paddedData = self
-        if paddedData.count % 4 != 0 {
-            paddedData.append(Data([UInt8](repeating: 0, count: paddedData.count % 4)))
-        }
-        let dataChunks = paddedData.blocks(of: 4)
-        
-        for i in 0..<dataChunks.count {
-            // https://stackoverflow.com/a/56854262
-            let bigEndianUInt32 = dataChunks[i].withUnsafeBytes { $0.load(as: UInt32.self) }
-            let value = CFByteOrderGetCurrent() == CFByteOrder(CFByteOrderLittleEndian.rawValue)
-                ? UInt32(bigEndian: bigEndianUInt32)
-                : bigEndianUInt32
-            result.append(value)
-        }
-        
-        return result
-    }
-    
-    // https://www.hackingwithswift.com/example-code/language/how-to-split-an-array-into-chunks
-    func blocks(of size: Int) -> [[Element]] {
-        return stride(from: 0, to: count, by: size).map {
-            Array(self[$0 ..< Swift.min($0 + size, count)])
-        }
-    }
-}
-
 // https://stackoverflow.com/a/52600783
-extension Data {
+public extension Data {
   /// A hexadecimal string representation of the bytes.
   func hexEncodedString() -> String {
     let hexDigits = Array("0123456789abcdef".utf16)
@@ -61,7 +25,7 @@ extension Data {
   }
 }
 
-extension String {
+public extension String {
   /// A data representation of the hexadecimal bytes in this string.
   func hexDecodedData() -> Data {
     // Get the UTF8 characters of this string
