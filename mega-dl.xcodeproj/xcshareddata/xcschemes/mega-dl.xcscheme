@@ -14,20 +14,6 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4E8A72FF2761358700BD3B5F"
-               BuildableName = "MegaKit.framework"
-               BlueprintName = "MegaKit"
-               ReferencedContainer = "container:mega-dl.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "4E08701826A9937400279E6A"
                BuildableName = "mega-dl"
                BlueprintName = "mega-dl"
