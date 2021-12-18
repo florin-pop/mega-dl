@@ -105,6 +105,7 @@
 				4E08701626A9937400279E6A /* Frameworks */,
 				4E08701726A9937400279E6A /* CopyFiles */,
 				4E970C582761C0F000A73229 /* Embed Frameworks */,
+				4E8F8173276E59E700A50232 /* Run swiftformat */,
 			);
 			buildRules = (
 			);
@@ -158,6 +159,27 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		4E8F8173276E59E700A50232 /* Run swiftformat */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Run swiftformat";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/opt/homebrew/bin/swiftformat . --swiftversion 5.5.2\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4E08701526A9937400279E6A /* Sources */ = {
