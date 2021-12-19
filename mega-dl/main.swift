@@ -12,7 +12,6 @@ import Foundation
 import MegaKit
 
 // Upcoming features:
-// Show Download speed
 // Resume on error
 // Read credentials from Keychain
 
@@ -130,6 +129,7 @@ struct MegaDL: ParsableCommand {
         dispatchGroup.notify(queue: .main) {
             MegaDL.exit(withError: nil)
         }
+
         DispatchQueue.global(qos: .default).async {
             let homeDirURL = FileManager.default.homeDirectoryForCurrentUser
             let optionalConfig = try? String(contentsOf: homeDirURL.appendingPathComponent(".megarc"))
@@ -186,7 +186,7 @@ struct MegaDL: ParsableCommand {
                                         return
                                     }
 
-                                    downloadFile(from: url, fileName: item.attributes.name, decryptionKey: item.key) {
+                                    downloadFile(from: url, to: decryptedFileUrl, fileName: item.attributes.name, decryptionKey: item.key) {
                                         dispatchGroup.leave()
                                     }
                                 case .failure:
@@ -208,7 +208,8 @@ struct MegaDL: ParsableCommand {
                 switch result {
                 case let .success(downloadMetadata):
                     bytesExpectedCallback(downloadMetadata.size)
-                    downloadFile(from: downloadMetadata.url, fileName: downloadMetadata.name, decryptionKey: downloadMetadata.key) {
+                    let decryptedFileUrl = URL(fileURLWithPath: FileManager().currentDirectoryPath).appendingPathComponent(downloadMetadata.name)
+                    downloadFile(from: downloadMetadata.url, to: decryptedFileUrl, fileName: downloadMetadata.name, decryptionKey: downloadMetadata.key) {
                         dispatchGroup.leave()
                     }
                 case let .failure(error):
@@ -219,8 +220,7 @@ struct MegaDL: ParsableCommand {
         }
     }
 
-    func downloadFile(from downloadUrl: URL, fileName: String, decryptionKey: Data, completion: @escaping () -> Void) {
-        let decryptedFileUrl = URL(fileURLWithPath: FileManager().currentDirectoryPath).appendingPathComponent(fileName)
+    func downloadFile(from downloadUrl: URL, to decryptedFileUrl: URL, fileName: String, decryptionKey: Data, completion: @escaping () -> Void) {
         let encryptedFileUrl = decryptedFileUrl.appendingPathExtension("encrypted")
 
         if FileManager.default.fileExists(atPath: encryptedFileUrl.path) {

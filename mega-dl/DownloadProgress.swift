@@ -16,7 +16,8 @@ class DownloadProgress {
 
     var totalBytesDecrypted: Int64 = 0
     var numberOfTerminalRows: UInt16 = 0
-    let sigwinchSrc: DispatchSourceSignal = DispatchSource.makeSignalSource(signal: SIGWINCH, queue: .main)
+    let sigwinchSrc = DispatchSource.makeSignalSource(signal: SIGWINCH, queue: .main)
+    let sigintSrc = DispatchSource.makeSignalSource(signal: SIGINT, queue: .main)
 
     init() {
         DispatchQueue.global(qos: .background).async {
@@ -41,30 +42,37 @@ class DownloadProgress {
 
         sigwinchSrc.setEventHandler {
             if ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == 0 {
-                write("\u{001B}7") // Save cursor position
-                write("\u{001B}[0;\(self.numberOfTerminalRows)r") // Drop line reservation
-                write("\u{001B}[\(self.numberOfTerminalRows);0f") // Move the cursor to the bottom line
-                write("\u{001B}[0K") // Clean that line
-                write("\u{001B}8") // Restore the cursor position
-
+                self.cleanup()
                 self.numberOfTerminalRows = w.ws_row
-
-                write("\n") // Ensure the last line is available.
-                write("\u{001B}7") // Save cursor position
-                write("\u{001B}[0;\(w.ws_row - 1)r") // Reserve the bottom line
-                write("\u{001B}8") // Restore the cursor position
-                write("\u{001B}[1A") // Move up one line
+                self.reserveBottomLine(totalNumerOfRows: w.ws_row)
             }
         }
         sigwinchSrc.resume()
 
-        /* Setup */
+        signal(SIGINT, SIG_IGN)
+        sigintSrc.setEventHandler {
+            self.cleanup()
+            exit(SIGINT)
+        }
+        sigintSrc.resume()
 
+        reserveBottomLine(totalNumerOfRows: w.ws_row)
+    }
+
+    func reserveBottomLine(totalNumerOfRows: UInt16) {
         write("\n") // Ensure the last line is available.
         write("\u{001B}7") // Save cursor position
-        write("\u{001B}[0;\(w.ws_row - 1)r") // Reserve the bottom line
+        write("\u{001B}[0;\(totalNumerOfRows - 1)r") // Reserve the bottom line
         write("\u{001B}8") // Restore the cursor position
         write("\u{001B}[1A") // Move up one line
+    }
+
+    func cleanup() {
+        write("\u{001B}7") // Save cursor position
+        write("\u{001B}[0;\(numberOfTerminalRows)r") // Drop line reservation
+        write("\u{001B}[\(numberOfTerminalRows);0f") // Move the cursor to the bottom line
+        write("\u{001B}[0K") // Clean that line
+        write("\u{001B}8") // Restore the cursor position
     }
 
     func printProgress() {
