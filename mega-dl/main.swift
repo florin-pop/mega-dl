@@ -11,10 +11,6 @@ import Dispatch
 import Foundation
 import MegaKit
 
-// Upcoming features:
-// Resume on error
-// Read credentials from Keychain
-
 extension Dictionary where Key == String, Value == DecryptedMegaNodeMetadata {
     func getPath(key: String, url: inout URL) {
         if let node = self[key] {
@@ -32,7 +28,7 @@ extension MegaError {
         case .requestFailed:
             return "HTTP request failed"
         case let .apiError(code):
-            // https://help.servmask.com/knowledgebase/mega-error-codes/
+            // As documented in https://help.servmask.com/knowledgebase/mega-error-codes/
             switch code {
             case -2: return "Invalid arguments"
             case -4: return "Too many requests per second"
@@ -110,8 +106,6 @@ extension DownloadProgress: AESDecryptorDelegate {
 struct MegaDL: ParsableCommand {
     @Argument(help: "The download url.") var url: String
 
-    static let decryptor = AESFileDecryptor()
-
     func run() {
         guard let megaLink = try? MegaLink(url: url) else {
             fatalError("Failed to recognize given url as a Mega link.")
@@ -120,132 +114,197 @@ struct MegaDL: ParsableCommand {
         let downloadProgress: DownloadProgress = {
             let downloadProgress = DownloadProgress()
             DownloadManager.shared.delegate = downloadProgress
-            Self.decryptor.delegate = downloadProgress
             return downloadProgress
         }()
 
+        let decryptor = AESFileDecryptor()
+        decryptor.delegate = downloadProgress
+
+        let sigwinchSrc = DispatchSource.makeSignalSource(signal: SIGWINCH, queue: .main)
+        let sigintSrc = DispatchSource.makeSignalSource(signal: SIGINT, queue: .main)
+
+        sigwinchSrc.setEventHandler {
+            downloadProgress.reset()
+        }
+        sigwinchSrc.resume()
+
+        // Intercept Ctrl+C in order to leave the Terminal in a clean state
+        signal(SIGINT, SIG_IGN)
+        sigintSrc.setEventHandler {
+            downloadProgress.cleanup()
+            MegaDL.exit(withError: nil)
+        }
+        sigintSrc.resume()
+
+        // Use a dispatch group in order to wait for all downloads to finish
         let dispatchGroup = DispatchGroup()
+
         dispatchGroup.enter()
         dispatchGroup.notify(queue: .main) {
             MegaDL.exit(withError: nil)
         }
 
+        scheduleDownloadSpeedUpdateTimer(downloadProgress: downloadProgress)
         DispatchQueue.global(qos: .default).async {
-            let homeDirURL = FileManager.default.homeDirectoryForCurrentUser
-            let optionalConfig = try? String(contentsOf: homeDirURL.appendingPathComponent(".megarc"))
-
-            if let config = optionalConfig.map({ parseConfig($0) }),
-               let credentials = config["Login"],
-               let email = credentials["Username"],
-               let password = credentials["Password"]
-            {
-                print("Authenticating using stored credentials")
-
-                let megaClient = MegaClient()
-                megaClient.login(using: email, password: password) { result in
-                    switch result {
-                    case let .success(sessionID):
-                        process(megaLink: megaLink, dispatchGroup: dispatchGroup, sessionID: sessionID, bytesExpectedCallback: { downloadProgress.totalBytesExpected = $0 })
-                    case let .failure(error):
-                        print("Authentication failed with error: \(error.description)")
-                        dispatchGroup.leave()
-                    }
+            openSession { sessionID, error in
+                guard error == nil else {
+                    dispatchGroup.leave()
+                    return
                 }
-            } else {
-                print("Downloading without credentials")
-                process(megaLink: megaLink, dispatchGroup: dispatchGroup, bytesExpectedCallback: { downloadProgress.totalBytesExpected = $0 })
+
+                download(from: megaLink, sessionID: sessionID, dispatchGroup: dispatchGroup, decryptor: decryptor, progress: downloadProgress)
             }
         }
 
         dispatchMain()
     }
+}
 
-    func process(megaLink: MegaLink, dispatchGroup: DispatchGroup, sessionID: String? = nil, bytesExpectedCallback: @escaping (Int64) -> Void) {
-        if megaLink.type == .folder {
-            let megaClient = MegaClient()
-            megaClient.getContents(of: megaLink, sessionID: sessionID) { result in
-                switch result {
-                case let .success(items):
-                    let totalBytesExpected = items.values.filter { $0.type == .file }.compactMap { Int64($0.size ?? 0) }.reduce(0, +)
-                    bytesExpectedCallback(totalBytesExpected)
+func openSession(completion: @escaping (String?, MegaError?) -> Void) {
+    let homeDirURL = FileManager.default.homeDirectoryForCurrentUser
+    let optionalConfig = try? String(contentsOf: homeDirURL.appendingPathComponent(".megarc"))
 
-                    for (_, item) in items {
-                        var decryptedFileUrl = URL(fileURLWithPath: FileManager().currentDirectoryPath)
-                        items.getPath(key: item.id, url: &decryptedFileUrl)
+    if let config = optionalConfig.map({ parseConfig($0) }),
+       let credentials = config["Login"],
+       let email = credentials["Username"],
+       let password = credentials["Password"]
+    {
+        print("Authenticating using stored credentials")
 
-                        if item.type == .folder {
-                            try? FileManager().createDirectory(at: decryptedFileUrl, withIntermediateDirectories: true, attributes: nil)
-                        } else if item.type == .file {
-                            dispatchGroup.enter()
-                            megaClient.getDownloadLink(from: item.id, parentNode: megaLink.id, sessionID: sessionID) { result in
-                                switch result {
-                                case let .success(fileInfo):
-                                    guard let url = URL(string: fileInfo.downloadLink) else {
-                                        print("Bad download URL for \(item.attributes.name). Skipping.")
-                                        dispatchGroup.leave()
-                                        return
-                                    }
+        let megaClient = MegaClient()
+        megaClient.login(using: email, password: password) { result in
+            switch result {
+            case let .success(sessionID):
+                completion(sessionID, nil)
+            case let .failure(error):
+                print("Authentication failed with error: \(error.description)")
+                completion(nil, error)
+            }
+        }
+    } else {
+        print("Proceeding without credentials")
+        completion(nil, nil)
+    }
+}
 
-                                    downloadFile(from: url, to: decryptedFileUrl, fileName: item.attributes.name, decryptionKey: item.key) {
-                                        dispatchGroup.leave()
-                                    }
-                                case .failure:
-                                    print("Cannot resolve download URL for \(item.attributes.name). Skipping.")
+func download(from megaLink: MegaLink, sessionID: String? = nil, dispatchGroup: DispatchGroup, decryptor: AESFileDecryptor, progress: DownloadProgress) {
+    if megaLink.type == .folder {
+        let megaClient = MegaClient()
+        megaClient.getContents(of: megaLink, sessionID: sessionID) { result in
+            switch result {
+            case let .success(items):
+                var totalBytesExpected = items.values.filter { $0.type == .file }.compactMap { Int64($0.size ?? 0) }.reduce(0, +)
+                progress.totalBytesExpected = totalBytesExpected
+
+                for (_, item) in items {
+                    var decryptedFileUrl = URL(fileURLWithPath: FileManager().currentDirectoryPath)
+                    items.getPath(key: item.id, url: &decryptedFileUrl)
+
+                    if item.type == .folder {
+                        try? FileManager().createDirectory(at: decryptedFileUrl, withIntermediateDirectories: true, attributes: nil)
+                    } else if item.type == .file {
+                        if FileManager.default.fileExists(atPath: decryptedFileUrl.path) {
+                            print("File exists: \(item.attributes.name).")
+                            totalBytesExpected -= Int64(item.size ?? 0)
+                            progress.totalBytesExpected = totalBytesExpected
+                            continue
+                        }
+
+                        dispatchGroup.enter()
+                        megaClient.getDownloadLink(from: item.id, parentNode: megaLink.id, sessionID: sessionID) { result in
+                            switch result {
+                            case let .success(fileInfo):
+                                guard let url = URL(string: fileInfo.downloadLink) else {
+                                    print("Bad download URL for \(item.attributes.name). Skipping.")
+                                    dispatchGroup.leave()
+                                    return
+                                }
+
+                                downloadAndDecryptFile(from: url, to: decryptedFileUrl, fileName: item.attributes.name, decryptionKey: item.key, decryptor: decryptor) {
                                     dispatchGroup.leave()
                                 }
+                            case .failure:
+                                print("Cannot resolve download URL for \(item.attributes.name). Skipping.")
+                                dispatchGroup.leave()
                             }
                         }
                     }
-                case let .failure(error):
-                    print("Retrieve folder contents failed with error: \(error.description)")
                 }
-
-                dispatchGroup.leave()
+            case let .failure(error):
+                print("Retrieve folder contents failed with error: \(error.description)")
             }
-        } else {
-            let megaClient = MegaClient()
-            megaClient.getFileMetadata(from: megaLink, sessionID: sessionID) { result in
-                switch result {
-                case let .success(downloadMetadata):
-                    bytesExpectedCallback(downloadMetadata.size)
-                    let decryptedFileUrl = URL(fileURLWithPath: FileManager().currentDirectoryPath).appendingPathComponent(downloadMetadata.name)
-                    downloadFile(from: downloadMetadata.url, to: decryptedFileUrl, fileName: downloadMetadata.name, decryptionKey: downloadMetadata.key) {
+
+            dispatchGroup.leave()
+        }
+    } else {
+        let megaClient = MegaClient()
+        megaClient.getFileMetadata(from: megaLink, sessionID: sessionID) { result in
+            switch result {
+            case let .success(downloadMetadata):
+                progress.totalBytesExpected = downloadMetadata.size
+                let decryptedFileUrl = URL(fileURLWithPath: FileManager().currentDirectoryPath).appendingPathComponent(downloadMetadata.name)
+                if FileManager.default.fileExists(atPath: decryptedFileUrl.path) {
+                    print("File exists: \(downloadMetadata.name).")
+                    dispatchGroup.leave()
+                } else {
+                    downloadAndDecryptFile(from: downloadMetadata.url, to: decryptedFileUrl, fileName: downloadMetadata.name, decryptionKey: downloadMetadata.key, decryptor: decryptor) {
                         dispatchGroup.leave()
                     }
-                case let .failure(error):
-                    print("Retrieve file metadata failed with error: \(error.description)")
-                    dispatchGroup.leave()
                 }
+            case let .failure(error):
+                print("Retrieve file metadata failed with error: \(error.description)")
+                dispatchGroup.leave()
             }
         }
     }
+}
 
-    func downloadFile(from downloadUrl: URL, to decryptedFileUrl: URL, fileName: String, decryptionKey: Data, completion: @escaping () -> Void) {
-        let encryptedFileUrl = decryptedFileUrl.appendingPathExtension("encrypted")
+func downloadAndDecryptFile(from downloadUrl: URL, to decryptedFileUrl: URL, fileName: String, decryptionKey: Data, decryptor: AESFileDecryptor, completion: @escaping () -> Void) {
+    let encryptedFileUrl = decryptedFileUrl.appendingPathExtension("encrypted")
 
-        if FileManager.default.fileExists(atPath: encryptedFileUrl.path) {
+    if FileManager.default.fileExists(atPath: encryptedFileUrl.path) {
+        FileManager.default.createFile(atPath: decryptedFileUrl.path, contents: nil)
+
+        decryptor.decrypt(encryptedFileUrl: encryptedFileUrl, decryptedFileUrl: decryptedFileUrl, key: decryptionKey) {
+            try? FileManager.default.removeItem(at: encryptedFileUrl)
+            completion()
+        }
+    } else {
+        DownloadManager.shared.download(url: downloadUrl, name: fileName) { downloadedFileUrl, error in
+            guard let downloadedFileUrl = downloadedFileUrl, error == nil else {
+                completion()
+                return
+            }
+
+            try? FileManager.default.moveItem(at: downloadedFileUrl, to: encryptedFileUrl)
             FileManager.default.createFile(atPath: decryptedFileUrl.path, contents: nil)
 
-            Self.decryptor.decrypt(encryptedFileUrl: encryptedFileUrl, decryptedFileUrl: decryptedFileUrl, key: decryptionKey) {
+            decryptor.decrypt(encryptedFileUrl: encryptedFileUrl, decryptedFileUrl: decryptedFileUrl, key: decryptionKey) {
                 try? FileManager.default.removeItem(at: encryptedFileUrl)
                 completion()
             }
-        } else {
-            DownloadManager.shared.download(url: downloadUrl, name: fileName) { downloadedFileUrl, error in
-                guard let downloadedFileUrl = downloadedFileUrl, error == nil else {
-                    completion()
-                    return
-                }
+        }
+    }
+}
 
-                try? FileManager.default.moveItem(at: downloadedFileUrl, to: encryptedFileUrl)
-                FileManager.default.createFile(atPath: decryptedFileUrl.path, contents: nil)
+func scheduleDownloadSpeedUpdateTimer(downloadProgress: DownloadProgress) {
+    DispatchQueue.global(qos: .userInteractive).async {
+        let downloadSpeedTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            if downloadProgress.lastMeasurement < downloadProgress.totalBytesDownloaded {
+                downloadProgress.downloadSpeed = downloadProgress.totalBytesDownloaded - downloadProgress.lastMeasurement
+            } else {
+                downloadProgress.downloadSpeed = 0
+            }
+            downloadProgress.lastMeasurement = downloadProgress.totalBytesDownloaded
 
-                Self.decryptor.decrypt(encryptedFileUrl: encryptedFileUrl, decryptedFileUrl: decryptedFileUrl, key: decryptionKey) {
-                    try? FileManager.default.removeItem(at: encryptedFileUrl)
-                    completion()
-                }
+            if downloadProgress.totalBytesDownloaded > 0 {
+                downloadProgress.printProgress()
             }
         }
+
+        let runLoop = RunLoop.current
+        runLoop.add(downloadSpeedTimer, forMode: .default)
+        runLoop.run()
     }
 }
 

@@ -8,7 +8,6 @@
 import Foundation
 
 class DownloadProgress {
-    var downloadSpeedTimer: Timer!
     var downloadSpeed: Int64 = 0
     var lastMeasurement: Int64 = 0
     var totalBytesExpected: Int64 = 0
@@ -16,50 +15,19 @@ class DownloadProgress {
 
     var totalBytesDecrypted: Int64 = 0
     var numberOfTerminalRows: UInt16 = 0
-    let sigwinchSrc = DispatchSource.makeSignalSource(signal: SIGWINCH, queue: .main)
-    let sigintSrc = DispatchSource.makeSignalSource(signal: SIGINT, queue: .main)
 
     init() {
-        DispatchQueue.global(qos: .background).async {
-            self.downloadSpeedTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-                if self.lastMeasurement < self.totalBytesDownloaded {
-                    self.downloadSpeed = self.totalBytesDownloaded - self.lastMeasurement
-                } else {
-                    self.downloadSpeed = 0
-                }
-                self.lastMeasurement = self.totalBytesDownloaded
-            }
-            let runLoop = RunLoop.current
-            runLoop.add(self.downloadSpeedTimer, forMode: .default)
-            runLoop.run()
-        }
-
         var w = winsize()
         guard ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == 0, w.ws_row > 0 else {
             return
         }
+
         numberOfTerminalRows = w.ws_row
-
-        sigwinchSrc.setEventHandler {
-            if ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == 0 {
-                self.cleanup()
-                self.numberOfTerminalRows = w.ws_row
-                self.reserveBottomLine(totalNumerOfRows: w.ws_row)
-            }
-        }
-        sigwinchSrc.resume()
-
-        signal(SIGINT, SIG_IGN)
-        sigintSrc.setEventHandler {
-            self.cleanup()
-            exit(SIGINT)
-        }
-        sigintSrc.resume()
-
         reserveBottomLine(totalNumerOfRows: w.ws_row)
     }
 
     func reserveBottomLine(totalNumerOfRows: UInt16) {
+        // Inspired by https://mdk.fr/blog/how-apt-does-its-fancy-progress-bar.html
         write("\n") // Ensure the last line is available.
         write("\u{001B}7") // Save cursor position
         write("\u{001B}[0;\(totalNumerOfRows - 1)r") // Reserve the bottom line
@@ -75,6 +43,15 @@ class DownloadProgress {
         write("\u{001B}8") // Restore the cursor position
     }
 
+    func reset() {
+        var w = winsize()
+        if ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == 0 {
+            cleanup()
+            numberOfTerminalRows = w.ws_row
+            reserveBottomLine(totalNumerOfRows: w.ws_row)
+        }
+    }
+
     func printProgress() {
         DispatchQueue.main.async {
             let byteCountFormatter = ByteCountFormatter()
@@ -85,7 +62,7 @@ class DownloadProgress {
             write("\u{001B}7") // Save cursor position
             write("\u{001B}[\(self.numberOfTerminalRows)0f") // Move cursor to the bottom margin
             write("\n\u{001B}[0K") // Clean that line
-            write("Download progress: \(self.totalBytesDownloaded * 100 / self.totalBytesExpected)% \(humanReadableDownloadSpeed)/s | Decryption progress: \(self.totalBytesDecrypted * 100 / self.totalBytesExpected)%") // Write the progress
+            write("Download Size: \(byteCountFormatter.string(fromByteCount: Int64(self.totalBytesExpected))) | Progress: \(self.totalBytesDownloaded * 100 / self.totalBytesExpected)% | Speed: \(humanReadableDownloadSpeed)/s | Decryption Progress: \(self.totalBytesDecrypted * 100 / self.totalBytesExpected)%") // Write the progress
             write("\u{001B}8") // Restore cursor position
         }
     }

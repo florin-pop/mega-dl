@@ -35,15 +35,13 @@ class DownloadManager: NSObject {
             self.name = name
             completionHandler = completion
 
-            let request = URLRequest(url: url)
-
-            downloadTask = DownloadManager.shared.urlSession.downloadTask(with: request)
+            downloadTask = DownloadManager.shared.urlSession.downloadTask(with: url)
             downloadTask.resume()
         }
     }
 
     fileprivate lazy var urlSession: URLSession = {
-        let configuration = URLSessionConfiguration.ephemeral
+        let configuration = URLSessionConfiguration.default
         return URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
     }()
 

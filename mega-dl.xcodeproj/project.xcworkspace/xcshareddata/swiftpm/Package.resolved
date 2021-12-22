@@ -23,9 +23,9 @@
         "package": "MegaKit",
         "repositoryURL": "git@github.com:florin-pop/MegaKit.git",
         "state": {
-          "branch": "main",
-          "revision": "b2945ac9a5792466f9e58f3f37e69a16074621e0",
-          "version": null
+          "branch": null,
+          "revision": "9ba3a9af437ac4ed1b4c59b58511d8bd5b27e014",
+          "version": "0.1.0"
         }
       },
       {
