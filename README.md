@@ -1,6 +1,6 @@
 # mega-dl
 
-Command line utility to download from Mega.nz
+`macOS` native command line utility to download from Mega.nz
 
 ## What's the purpose of this project?
 
