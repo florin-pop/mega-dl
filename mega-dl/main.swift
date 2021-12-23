@@ -47,7 +47,7 @@ extension MegaError {
             return "Received unexpected response from API"
         case .unknown:
             return "Unknown error"
-        case .decryptionFailed:
+        case .cryptographyError:
             return "Cryptography error"
         case .unimplemented:
             return "The API required a functionality that is not yet implemented"

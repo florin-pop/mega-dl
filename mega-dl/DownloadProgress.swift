@@ -62,7 +62,12 @@ class DownloadProgress {
             write("\u{001B}7") // Save cursor position
             write("\u{001B}[\(self.numberOfTerminalRows)0f") // Move cursor to the bottom margin
             write("\n\u{001B}[0K") // Clean that line
-            write("Download Size: \(byteCountFormatter.string(fromByteCount: Int64(self.totalBytesExpected))) | Progress: \(self.totalBytesDownloaded * 100 / self.totalBytesExpected)% | Speed: \(humanReadableDownloadSpeed)/s | Decryption Progress: \(self.totalBytesDecrypted * 100 / self.totalBytesExpected)%") // Write the progress
+            // Write the progress
+            if self.totalBytesDownloaded < self.totalBytesExpected {
+                write("Download Size: \(byteCountFormatter.string(fromByteCount: Int64(self.totalBytesExpected))) | Progress: \(self.totalBytesDownloaded * 100 / self.totalBytesExpected)% | Speed: \(humanReadableDownloadSpeed)/s | Decryption Progress: \(self.totalBytesDecrypted * 100 / self.totalBytesExpected)%")
+            } else {
+                write("Download Finished | Decryption Progress: \(self.totalBytesDecrypted * 100 / self.totalBytesExpected)%")
+            }
             write("\u{001B}8") // Restore cursor position
         }
     }

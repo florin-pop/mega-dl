@@ -12,7 +12,7 @@
 		4E18B38126A9B24900522810 /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = 4E18B38026A9B24900522810 /* ArgumentParser */; };
 		4E8F816C276DF9B500A50232 /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 4E8F816B276DF9B500A50232 /* CryptoSwift */; };
 		4E8F816F276DF9E100A50232 /* BigInt in Frameworks */ = {isa = PBXBuildFile; productRef = 4E8F816E276DF9E100A50232 /* BigInt */; };
-		4E8F8172276DF9FE00A50232 /* MegaKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4E8F8171276DF9FE00A50232 /* MegaKit */; };
+		4ECC3E4B27743EE800713396 /* MegaKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4ECC3E4A27743EE800713396 /* MegaKit */; };
 		4EF6C44826A9E36F001C2088 /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF6C44726A9E36F001C2088 /* DownloadManager.swift */; };
 /* End PBXBuildFile section */
 
@@ -51,7 +51,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4E8F816F276DF9E100A50232 /* BigInt in Frameworks */,
-				4E8F8172276DF9FE00A50232 /* MegaKit in Frameworks */,
+				4ECC3E4B27743EE800713396 /* MegaKit in Frameworks */,
 				4E18B38126A9B24900522810 /* ArgumentParser in Frameworks */,
 				4E8F816C276DF9B500A50232 /* CryptoSwift in Frameworks */,
 			);
@@ -116,7 +116,7 @@
 				4E18B38026A9B24900522810 /* ArgumentParser */,
 				4E8F816B276DF9B500A50232 /* CryptoSwift */,
 				4E8F816E276DF9E100A50232 /* BigInt */,
-				4E8F8171276DF9FE00A50232 /* MegaKit */,
+				4ECC3E4A27743EE800713396 /* MegaKit */,
 			);
 			productName = "mega-dl";
 			productReference = 4E08701926A9937400279E6A /* mega-dl */;
@@ -149,7 +149,7 @@
 				4E18B37F26A9B24900522810 /* XCRemoteSwiftPackageReference "swift-argument-parser" */,
 				4E8F816A276DF9B500A50232 /* XCRemoteSwiftPackageReference "CryptoSwift" */,
 				4E8F816D276DF9E100A50232 /* XCRemoteSwiftPackageReference "BigInt" */,
-				4E8F8170276DF9FE00A50232 /* XCRemoteSwiftPackageReference "MegaKit" */,
+				4ECC3E4927743EE800713396 /* XCRemoteSwiftPackageReference "MegaKit" */,
 			);
 			productRefGroup = 4E08701A26A9937400279E6A /* Products */;
 			projectDirPath = "";
@@ -388,12 +388,12 @@
 				minimumVersion = 5.0.0;
 			};
 		};
-		4E8F8170276DF9FE00A50232 /* XCRemoteSwiftPackageReference "MegaKit" */ = {
+		4ECC3E4927743EE800713396 /* XCRemoteSwiftPackageReference "MegaKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "git@github.com:florin-pop/MegaKit.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.1.0;
+				minimumVersion = 0.2.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -414,9 +414,9 @@
 			package = 4E8F816D276DF9E100A50232 /* XCRemoteSwiftPackageReference "BigInt" */;
 			productName = BigInt;
 		};
-		4E8F8171276DF9FE00A50232 /* MegaKit */ = {
+		4ECC3E4A27743EE800713396 /* MegaKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4E8F8170276DF9FE00A50232 /* XCRemoteSwiftPackageReference "MegaKit" */;
+			package = 4ECC3E4927743EE800713396 /* XCRemoteSwiftPackageReference "MegaKit" */;
 			productName = MegaKit;
 		};
 /* End XCSwiftPackageProductDependency section */
